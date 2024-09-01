@@ -11,7 +11,7 @@ def extract_audio_features(file_path):
     # Extract Chroma features (pitch classes)
     chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     
-    # Concatenate features into a single feature vector
+    # Concatenate features into a vector
     feature_vector = np.hstack((np.mean(mfccs, axis=1), np.mean(chroma, axis=1)))
     
     return feature_vector
