@@ -4,9 +4,10 @@
 
 from DataPreparation import prepare_dataset
 
-dataset, labels = prepare_dataset('./Chords')
+# Prepare the dataset using the new extract_spectrogram method
+dataset, labels = prepare_dataset('./Audio_Files')
 
-from sklearn.model_selection import KFold # machine learning training library
+from sklearn.model_selection import KFold  # machine learning training library
 from sklearn.preprocessing import LabelEncoder
 
 # For training, Labels need to be converted to integers
@@ -14,7 +15,7 @@ label_encoder = LabelEncoder()
 label_encoded = label_encoder.fit_transform(labels)
 
 # preparing k-fold validation for training
-k = 5 # number of folds
+k = 5  # number of folds
 kfoldval = KFold(n_splits=k, shuffle=True, random_state=69)
 
 # storing accuracies of the model on each fold
@@ -26,7 +27,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
-from Model import create_model
+from Model import create_cnn_model  # Assuming we are using the CNN model
 
 # K-Fold Cross-Validation Loop
 for train_index, val_index in kfoldval.split(dataset):
@@ -34,10 +35,10 @@ for train_index, val_index in kfoldval.split(dataset):
     dataset_train, dataset_val = dataset[train_index], dataset[val_index]
     label_train, label_val = label_encoded[train_index], label_encoded[val_index]
 
-    # define model (redefined each fold to reset weights)
-    model = create_model(dataset_train, label_encoder)
+    # Define model (redefined each fold to reset weights)
+    model = create_cnn_model(dataset_train, label_encoder)
 
-     # Compile the model
+    # Compile the model
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     # Train the model
