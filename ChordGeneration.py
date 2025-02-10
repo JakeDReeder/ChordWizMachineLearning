@@ -1,58 +1,69 @@
 # This Programatically generates MIDI files of chord sounds
 # then the MIDI files will be turned into WAV files for better processing by the model
 
-import librosa
 import os
-import mido
-from mido import Message, MidiFile, MidiTrack
-import subprocess
+import librosa
+import fluidsynth
 
-# List of arrays for chords 
+# Example dictionary of chords with inversions
 CHORDS = {
-    "C_Major": [["C4", "E4", "G4"], ["G3", "C4", "E4"], ["E4", "G4", "C5"]]
+    "C_Major": [["C4", "E4", "G4"], ["G3", "C4", "E4"], ["E4", "G4", "C5"]],
+    "D_Minor": [["D4", "F4", "A4"], ["A3", "D4", "F4"], ["F4", "A4", "D5"]],
 }
 
-INSTRUMENTS = {"piano": 0 }
+# Path to your SoundFont file
+SOUNDFONT_PATH = "path/to/your/soundfont.sf2"
 
-# Method for making MIDI file
-def make_midi_file(chord_name, notes, instrument, filename):
-    midi = MidiFile()
-    track = MidiTrack()
-    midi.tracks.append(track)
+# Output directories for WAV files
+OUTPUT_DIR = "dataset"
 
-    # set the intrument type
-    track.append(Message('program_change', program=INSTRUMENTS[instrument], time=0))
+def note_to_midi(note):
+    """Convert a musical note (e.g., 'C4') to its corresponding MIDI number."""
+    return librosa.note_to_midi(note)
 
-    # start midi input based on music note
-    for note in librosa.note_to_midi(notes):
-        track.append(Message('note_on', note=int(note), velocity=64, time=0))
+def generate_chord_wav(chord_name, inversion, output_path, fs):
+    """Generate a WAV file for a given chord and its inversion."""
+    # Convert notes to MIDI
+    midi_notes = [note_to_midi(note) for note in inversion]
 
-    # sustain the note for 4 seconds
-    track.append(Message('note_off', note=int(librosa.note_to_midi(notes)[0]), velocity=64, time=4000))
+    # Start playing the notes
+    for note in midi_notes:
+        fs.noteon(0, note, 100)  # Channel 0, velocity 100
 
-    #stop midi input
-    for note in librosa.note_to_midi(notes[1:]):
-        track.append(Message('note_off', note=int(note), velocity=64, time=0))
+    # Play for 4 seconds (enough time for sustained notes)
+    fs.sleep(4)
 
-    # save the midifile
-    midi_path = f"dataset/midi/{filename}.mid"
-    midi.save(midi_path)
-    return midi_path
+    # Stop playing the notes
+    for note in midi_notes:
+        fs.noteoff(0, note)
 
-def convert_midi_to_wav(midi_path, wav_path, soundfont="soundfont.sf2"):
-    command = ["fluidsynth", "-ni", soundfont, midi_path, "-F", wav_path, "-r", "44100"] # fluidsynth command to convert to wav 
-    subprocess.run(command, check=True)
+    print(f"Generated: {output_path}")
 
-def generate_chord_dataset():
-    for chord_name, inversions in CHORDS.items():
-        for inversion in inversions:
-            for instrument in INSTRUMENTS.keys():
-                filename = f"{chord_name}_{'_'.join(inversion)}_{instrument}"
-                midi_path = make_midi_file(chord_name, inversion, instrument, filename)
-                wav_path = f"dataset/wav/{filename}.wav"
+def generate_dataset(chords, soundfont_path, output_dir):
+    """Generate WAV files for all chords in the dictionary."""
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
 
-                convert_midi_to_wav(midi_path, wav_path)
-                print(f"Generated: {wav_path}")
+    # Initialize FluidSynth
+    fs = fluidsynth.Synth()
+    fs.start(driver="file")  # Set audio output to WAV file
+    fs.sfload(soundfont_path)
 
+    # Process each chord and its inversions
+    for chord_name, inversions in chords.items():
+        for i, inversion in enumerate(inversions):
+            # Create a unique filename for each inversion
+            filename = f"{chord_name}_inversion_{i + 1}.wav"
+            output_path = os.path.join(output_dir, filename)
 
-generate_chord_dataset();
+            # Set the output file for FluidSynth
+            os.environ["AUDIOFILE"] = output_path
+
+            # Generate the WAV file
+            generate_chord_wav(chord_name, inversion, output_path, fs)
+
+    # Clean up FluidSynth
+    fs.delete()
+
+# Call the function to generate the dataset
+generate_dataset(CHORDS, SOUNDFONT_PATH, OUTPUT_DIR)
