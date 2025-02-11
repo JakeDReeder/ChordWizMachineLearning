@@ -4,6 +4,7 @@
 import os
 import librosa
 import fluidsynth
+import time
 
 # Example dictionary of chords with inversions
 CHORDS = {
@@ -12,13 +13,13 @@ CHORDS = {
 }
 
 # Path to your SoundFont file
-SOUNDFONT_PATH = "path/to/your/soundfont.sf2"
+SOUNDFONT_PATH = "Soundfonts/UprightPianoKW-SF2-20220221/UprightPianoKW-20220221.sf2"
 
 # Output directories for WAV files
 OUTPUT_DIR = "dataset"
 
 def note_to_midi(note):
-    """Convert a musical note (e.g., 'C4') to its corresponding MIDI number."""
+    """Convert a musical note ('C4') to its corresponding MIDI number."""
     return librosa.note_to_midi(note)
 
 def generate_chord_wav(chord_name, inversion, output_path, fs):
@@ -31,7 +32,7 @@ def generate_chord_wav(chord_name, inversion, output_path, fs):
         fs.noteon(0, note, 100)  # Channel 0, velocity 100
 
     # Play for 4 seconds (enough time for sustained notes)
-    fs.sleep(4)
+    time.sleep(4)
 
     # Stop playing the notes
     for note in midi_notes:
