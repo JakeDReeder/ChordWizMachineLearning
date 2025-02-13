@@ -5,7 +5,7 @@
 from DataPreparation import prepare_dataset
 
 # Prepare the dataset using the new extract_spectrogram method
-dataset, labels = prepare_dataset('./Audio_Files')
+dataset, labels = prepare_dataset('./data')
 
 from sklearn.model_selection import KFold  # machine learning training library
 from sklearn.preprocessing import LabelEncoder
