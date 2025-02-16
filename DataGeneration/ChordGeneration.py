@@ -51,7 +51,7 @@ class ChordGenerator:
         # Normalize the audio
         audio_data = audio_data / np.max(np.abs(audio_data))
         
-        # Convert to 16-bit PCM
+        # Convert to 16-bit
         audio_data = (audio_data * 32767).astype(np.int16)
         
         # Save the file
@@ -59,7 +59,6 @@ class ChordGenerator:
 
     def generate_chord_file(self, notes, output_path, duration=4.0, velocity=100):
         """Generate a WAV file for a chord."""
-        # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
         
         # Generate and save the chord
@@ -80,8 +79,6 @@ if __name__ == "__main__":
     MAJOR_OUTPUT_DIR = "../data/major"
     MINOR_OUTPUT_DIR = "../data/minor"
 
-    
-    # Create chord generator
     generator = ChordGenerator(SOUNDFONT_PATH)
     
     # Generate Major chords

@@ -31,15 +31,15 @@ MINOR_CHORDS = {
     'G_Minor': [['G1', 'A#2', 'D2'], ['A#2', 'D2', 'G2'], ['D2', 'G2', 'A#3'], ['G2', 'A#3', 'D3'], ['A#3', 'D3', 'G3'], ['D3', 'G3', 'A#4'], ['G3', 'A#4', 'D4'], ['A#4', 'D4', 'G4'], ['D4', 'G4', 'A#5'], ['G4', 'A#5', 'D5'], ['A#5', 'D5', 'G5'], ['D5', 'G5', 'A#6'], ['G5', 'A#6', 'D6'], ['A#6', 'D6', 'G6'], ['D6', 'G6', 'A#7'], ['G6', 'A#7', 'D7'], ['A#7', 'D7', 'G7'], ['D7', 'G7', 'A#8']]
 }
 
-class ChordGenerator:
+class ChordDictionaryGenerator:
     def __init__(self):
-        # Define the basic chromatic scale (12 notes)
-        self.CHROMATIC_SCALE = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+        # All 12 musical notes (Chromatic Scale)
+        self.MUSICAL_NOTES = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
         
-        # Create a list of all notes on a piano (A0 to C8)
+        # Creates list of all notes on a piano (A0 to C8)
         self.ALL_PIANO_NOTES = []
         for octave in range(0, 9):
-            for note in self.CHROMATIC_SCALE:
+            for note in self.MUSICAL_NOTES:
                 piano_note = f"{note}{octave}"
                 if ((note == 'A' or note == 'A#' or note == 'B') and octave >= 0) or \
                     (octave > 0 and octave < 8) or \
@@ -48,7 +48,7 @@ class ChordGenerator:
 
     def get_next_octave_note(self, note):
         """
-        Find the next occurrence of the same note in the next octave.
+        Find the same note in the next octave.
         Example: 'A0' -> 'A1', 'C#4' -> 'C#5'
         """
         note_name = note.rstrip('0123456789')  # Get the note without octave
@@ -61,46 +61,44 @@ class ChordGenerator:
 
     def get_chord_notes(self, root, intervals):
         """
-        Get the notes of a chord based on root note and intervals.
+        Get the notes of a chord using root note and intervals.
         Example: root='A', intervals=[4, 7] -> ['A', 'C#', 'E']
         """
-        root_idx = self.CHROMATIC_SCALE.index(root)
+        root_index = self.MUSICAL_NOTES.index(root)
         chord_notes = [root]
         
         for interval in intervals:
-            note_idx = (root_idx + interval) % 12
-            chord_notes.append(self.CHROMATIC_SCALE[note_idx])
+            note_idx = (root_index + interval) % 12 # mod 12 for twelve notes
+            chord_notes.append(self.MUSICAL_NOTES[note_idx])
             
         return chord_notes
 
     def generate_chord_inversions(self, root_note, intervals):
-        """
-        Generate all possible inversions of a chord starting from a given root note.
-        """
+
         # Get the basic chord notes (without octaves)
         root = root_note.rstrip('0123456789')
         chord_notes = self.get_chord_notes(root, intervals)
         
         # Find the first occurrence of each chord note on piano
         current_chord = []
-        current_idx = self.ALL_PIANO_NOTES.index(root_note)
+        current_index = self.ALL_PIANO_NOTES.index(root_note)
         
         # Build the first position of the chord
         for note in chord_notes:
             # Find the first available occurrence of this note
-            while current_idx < len(self.ALL_PIANO_NOTES):
-                current_piano_note = self.ALL_PIANO_NOTES[current_idx]
+            while current_index < len(self.ALL_PIANO_NOTES):
+                current_piano_note = self.ALL_PIANO_NOTES[current_index]
                 current_note = current_piano_note.rstrip('0123456789')
                 if current_note == note:
                     current_chord.append(current_piano_note)
                     break
-                current_idx += 1
+                current_index += 1
         
         if len(current_chord) != len(chord_notes):
-            return []  # Couldn't build the complete chord
+            return []
             
         # Store all inversions
-        all_inversions = [current_chord]
+        inversions = [current_chord]
         
         while True:
             # Create next inversion:
@@ -117,71 +115,59 @@ class ChordGenerator:
             
             # Check if all notes are valid
             if all(note in self.ALL_PIANO_NOTES for note in new_chord):
-                all_inversions.append(new_chord)
+                inversions.append(new_chord)
                 current_chord = new_chord
             else:
                 break
                 
-        return all_inversions
+        return inversions
 
     def create_chord_dictionary(self, chord_name, intervals):
-        """
-        Create a dictionary of all possible chord inversions for each root note.
-        """
-        chord_dict = {}
+
+        chords = {}
         
-        for root in self.CHROMATIC_SCALE:
-            chord_key = f"{root}_{chord_name}"
+        for root in self.MUSICAL_NOTES:
+            chord = f"{root}_{chord_name}"
             
             # Find the lowest occurrence of this root note
             start_note = None
             for note in self.ALL_PIANO_NOTES:
-                if note.rstrip('0123456789') == root:
+                if note.rstrip('0123456789') == root: # remove octave digit
                     start_note = note
                     break
             
             if start_note:
                 inversions = self.generate_chord_inversions(start_note, intervals)
                 if inversions:
-                    chord_dict[chord_key] = inversions
+                    chords[chord] = inversions
                     
-        return chord_dict
+        return chords
 
-def print_formatted_dictionary(chord_dict, dict_name):
-    """
-    Print the dictionary in a format that can be copied directly into code.
-    """
+def print_dictionary(chord_dict, dict_name):
     print(f"{dict_name} = {{")
     
-    # Get sorted keys to ensure consistent order
-    sorted_keys = sorted(chord_dict.keys())
+    # Get Keys which are chord names
+    keys = chord_dict.keys()
     
     # Print each chord's inversions
-    for i, key in enumerate(sorted_keys):
+    for i, key in enumerate(keys):
         inversions = chord_dict[key]
         
-        # Format the line
         line = f"    '{key}': {inversions}"
         
         # Add comma if not the last item
-        if i < len(sorted_keys) - 1:
+        if i < len(keys) - 1:
             line += ","
             
         print(line)
     
-    print("}")
+    print("}")    
 
-# Example usage
-def main():
-    generator = ChordGenerator()
+if __name__ == "__main__":
+    generator = ChordDictionaryGenerator()
     
-    # Generate major chord dictionary (intervals: major third [4] and perfect fifth [7])
     major_chords = generator.create_chord_dictionary("Major", [4, 7])
     minor_chords = generator.create_chord_dictionary("Minor", [3, 7])
     
-    # Print the dictionary in the requested format
-    print_formatted_dictionary(major_chords, "MAJOR_CHORDS")
-    print_formatted_dictionary(minor_chords, "MINOR_CHORDS")
-
-if __name__ == "__main__":
-    main()
+    print_dictionary(major_chords, "MAJOR_CHORDS")
+    print_dictionary(minor_chords, "MINOR_CHORDS")
