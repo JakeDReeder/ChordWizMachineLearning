@@ -1,4 +1,5 @@
 # this is file for storing dictionaries of chords for generating
+# as well as generating more dictionary entries.
 
 MAJOR_CHORDS = {
     'A_Major': [['A0', 'C#1', 'E1'], ['C#1', 'E1', 'A1'], ['E1', 'A1', 'C#2'], ['A1', 'C#2', 'E2'], ['C#2', 'E2', 'A2'], ['E2', 'A2', 'C#3'], ['A2', 'C#3', 'E3'], ['C#3', 'E3', 'A3'], ['E3', 'A3', 'C#4'], ['A3', 'C#4', 'E4'], ['C#4', 'E4', 'A4'], ['E4', 'A4', 'C#5'], ['A4', 'C#5', 'E5'], ['C#5', 'E5', 'A5'], ['E5', 'A5', 'C#6'], ['A5', 'C#6', 'E6'], ['C#6', 'E6', 'A6'], ['E6', 'A6', 'C#7'], ['A6', 'C#7', 'E7'], ['C#7', 'E7', 'A7']],
