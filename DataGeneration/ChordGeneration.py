@@ -37,6 +37,9 @@ class ChordGenerator:
         # Stop notes
         for note in midi_notes:
             self.fs.noteoff(0, note)
+        
+        # convert from stereo to mono
+        audio_data = np.mean(np.reshape(audio_data, (-1, 2)), axis=1)
             
         # Wait a bit to let the sound decay
         time.sleep(0.1)
