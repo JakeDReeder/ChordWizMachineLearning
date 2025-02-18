@@ -4,10 +4,9 @@
 
 from DataPreparation import prepare_dataset
 
-# Prepare the dataset using the new extract_spectrogram method
 dataset, labels = prepare_dataset('./data')
 
-from sklearn.model_selection import KFold  # machine learning training library
+from sklearn.model_selection import KFold  
 from sklearn.preprocessing import LabelEncoder
 
 # For training, Labels need to be converted to integers
@@ -18,10 +17,9 @@ label_encoded = label_encoder.fit_transform(labels)
 k = 5  # number of folds
 kfoldval = KFold(n_splits=k, shuffle=True, random_state=69)
 
-# storing accuracies of the model on each fold
 fold_accuracies = []
 
-# TESTING THE MODEL
+# TRAINING AND TESTING THE MODEL
 
 import numpy as np
 import tensorflow as tf
@@ -39,10 +37,10 @@ for train_index, val_index in kfoldval.split(dataset):
     model = create_cnn_model(dataset_train, label_encoder)
 
     # Compile the model
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='BinaryCrossentropy', metrics=['accuracy'])
 
     # Train the model
-    model.fit(dataset_train, label_train, epochs=50, batch_size=32, verbose=1)
+    model.fit(dataset_train, label_train, epochs=200, batch_size=32, verbose=1)
 
     # Evaluate the model on the validation set
     val_loss, val_accuracy = model.evaluate(dataset_val, label_val, verbose=0)
