@@ -29,10 +29,10 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import ModelCheckpoint
 from Model import create_cnn_model  
 
-# for storing the model
-# checkpoint_path = "training_1/cp.ckpt"
-# checkpoint_dir = os.path.dirname(checkpoint_path)
-# cp_callback = ModelCheckpoint(checkpoint_path, monitor='val_accuracy', verbose=1, save_best_only=True)
+# for storing the model history
+checkpoint_path = "Major_Minor_Checkpoint.keras"
+checkpoint_dir = os.path.dirname(checkpoint_path)
+callbacks = ModelCheckpoint(checkpoint_path, monitor='val_accuracy', verbose=1, save_best_only=True)
 
 saved_model = Sequential()
 
@@ -46,9 +46,7 @@ for train_index, val_index in kfoldval.split(dataset):
 
     model.compile(optimizer='adam', loss='BinaryCrossentropy', metrics=['accuracy'])
 
-    model.fit(dataset_train, label_train, epochs=200, batch_size=32, verbose=1)
-
-    saved_model = model
+    saved_model = model.fit(dataset_train, label_train, epochs=100, batch_size=32, verbose=1, callbacks=callbacks)
 
     val_loss, val_accuracy = model.evaluate(dataset_val, label_val, verbose=0)
     fold_accuracies.append(val_accuracy)
