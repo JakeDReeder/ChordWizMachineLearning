@@ -30,7 +30,6 @@ def prepare_dataset(folder_path, duration=2.0, n_mels=128, sr=44100):
     dataset = np.array(dataset)
     labels = np.array(labels)
 
-    dataset = dataset.astype('float32')  # Ensure the data type is float32 for CNN
-    dataset = dataset / np.max(dataset)  # Normalize to the range [0, 1]
+    dataset = dataset.astype('float32') 
 
     return dataset, labels

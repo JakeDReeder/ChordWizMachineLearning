@@ -10,7 +10,7 @@ def extract_spectrogram(file_path, n_mels=128, duration=2.0, sr=44100):
     mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, fmax=8000)
     mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
     
-    mel_spectrogram_db = np.expand_dims(mel_spectrogram_db, axis=-1)  
+    # mel_spectrogram_db = np.expand_dims(mel_spectrogram_db, axis=-1)  
     
     return mel_spectrogram_db
 

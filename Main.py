@@ -14,7 +14,7 @@ label_encoder = LabelEncoder()
 label_encoded = label_encoder.fit_transform(labels)
 
 # preparing k-fold validation for training
-k = 5  # number of folds
+k = 5  
 kfoldval = KFold(n_splits=k, shuffle=True, random_state=69)
 
 fold_accuracies = []
@@ -29,30 +29,34 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import ModelCheckpoint
 from Model import create_cnn_model  
 
-# for storing the model history
-checkpoint_path = "Major_Minor_Checkpoint.keras"
-checkpoint_dir = os.path.dirname(checkpoint_path)
-callbacks = ModelCheckpoint(checkpoint_path, monitor='val_accuracy', verbose=1, save_best_only=True)
+best_model = None
+best_accuracy = 0
 
-saved_model = Sequential()
-
-# K-Fold Cross-Validation Loop
 for train_index, val_index in kfoldval.split(dataset):
-    # Split data into training and validation sets for the current fold
     dataset_train, dataset_val = dataset[train_index], dataset[val_index]
     label_train, label_val = label_encoded[train_index], label_encoded[val_index]
 
-    model = create_cnn_model(dataset_train, label_encoder)
+    model = create_cnn_model(dataset_train, label_encoder)  
 
     model.compile(optimizer='adam', loss='BinaryCrossentropy', metrics=['accuracy'])
 
-    saved_model = model.fit(dataset_train, label_train, epochs=100, batch_size=32, verbose=1, callbacks=callbacks)
+    model.fit(dataset_train, label_train, epochs=200, batch_size=32, verbose=1)
 
     val_loss, val_accuracy = model.evaluate(dataset_val, label_val, verbose=0)
     fold_accuracies.append(val_accuracy)
+
     print(f"Fold accuracy: {val_accuracy:.2f}")
 
-saved_model.save("Major_Minor_Model.keras")
+    if val_accuracy > best_accuracy:
+        best_accuracy = val_accuracy
+        best_model = model
+
+if best_model:
+    best_model.save("Major_Minor_Model.keras")
+
+average_accuracy = np.mean(fold_accuracies)
+print(f"Average K-Fold Accuracy: {average_accuracy:.2f}")
+
 
 # Calculate the average accuracy across all folds
 average_accuracy = np.mean(fold_accuracies)
