@@ -1,8 +1,9 @@
 import os
 import numpy as np
+from sklearn.model_selection import train_test_split
 from AudioProcessing import extract_spectrogram
 
-def prepare_dataset(folder_path, duration=2.0, n_mels=128, sr=44100):
+def prepare_dataset(folder_path, duration=2.0, n_mels=128, sr=44100, test_size=0.1, val_size=0.1):
     dataset = []  # spectrograms
     labels = []   # chord types
 
@@ -27,9 +28,18 @@ def prepare_dataset(folder_path, duration=2.0, n_mels=128, sr=44100):
             labels.append(chord_label)
 
     # Convert dataset and labels to numpy arrays for model training
-    dataset = np.array(dataset)
+    dataset = np.array(dataset, dtype=np.float32)
     labels = np.array(labels)
 
-    dataset = dataset.astype('float32') 
+    # Split into training and temp set (where temp set will be split into val & test)
+    train_data, temp_data, train_labels, temp_labels = train_test_split(
+        dataset, labels, test_size=(test_size + val_size), random_state=42, stratify=labels
+    )
 
-    return dataset, labels
+    # Split temp set into validation and test
+    val_size_adjusted = val_size / (test_size + val_size)  # Adjust proportion for splitting
+    val_data, test_data, val_labels, test_labels = train_test_split(
+        temp_data, temp_labels, test_size=val_size_adjusted, random_state=42, stratify=temp_labels
+    )
+
+    return train_data, train_labels, val_data, val_labels, test_data, test_labels
