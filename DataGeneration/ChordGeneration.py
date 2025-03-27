@@ -1,6 +1,3 @@
-# This file programmatically generates musical chord data
-# Made a class so that we can generate more when needed.
-
 import os
 import numpy as np
 from scipy.io import wavfile
@@ -13,7 +10,7 @@ class ChordGenerator:
         """Initialize the chord generator with a soundfont and sample rate."""
         self.sample_rate = sample_rate
         self.fs = fluidsynth.Synth() # object that is used for generating wav files
-        self.fs.start()
+        self.fs.start(driver="dsound")
         
         # Load soundfont (piano sound, guitar sound, etc.)
         sound_font = self.fs.sfload(soundfont_path)
@@ -46,56 +43,53 @@ class ChordGenerator:
         
         return np.array(audio_data)
 
+    def apply_micro_tuning(self, audio_data):
+        factor = np.random.uniform(0.99, 1.01)
+        return librosa.effects.time_stretch(audio_data, factor)
+    
+    def apply_envelope(self, audio_data):
+        env = np.linspace(0.5, 1, len(audio_data))
+        return audio_data * env
+
+    def add_noise(self, audio_data):
+        noise = np.random.normal(0, 0.005, audio_data.shape)
+        return audio_data + noise
+    
     def save_wav(self, audio_data, filename):
-        """Save audio data to a WAV file."""
-        # Ensure the audio data is in the correct format
         audio_data = np.array(audio_data).astype(np.float32)
-        
-        # Normalize the audio
         audio_data = audio_data / np.max(np.abs(audio_data))
-        
-        # Convert to 16-bit
         audio_data = (audio_data * 32767).astype(np.int16)
-        
-        # Save the file
         wavfile.write(filename, self.sample_rate, audio_data)
-
-    def generate_chord_file(self, notes, output_path, duration=4.0, velocity=100):
-        """Generate a WAV file for a chord."""
-        os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+    
+    def generate_chord_files(self, notes, output_dir, chord_name):
+        os.makedirs(output_dir, exist_ok=True)
+        base_audio = self.generate_chord(notes)
         
-        # Generate and save the chord
-        audio_data = self.generate_chord(notes, duration, velocity)
-        self.save_wav(audio_data, output_path)
-
+        variants = {
+            "micro_tuning": self.apply_micro_tuning(base_audio),
+            "envelope_mod": self.apply_envelope(base_audio),
+            "noise_addition": self.add_noise(base_audio),
+            "combined": self.apply_envelope(self.add_noise(self.apply_micro_tuning(base_audio)))
+        }
+        
+        for variant_name, audio in variants.items():
+            filename = f"{chord_name}_{variant_name}.wav"
+            self.save_wav(audio, os.path.join(output_dir, filename))
+    
     def __del__(self):
-        """Cleanup when the object is destroyed."""
         self.fs.delete()
-
 
 from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS
 
 if __name__ == "__main__":
-    
-    
     SOUNDFONT_PATH = "Soundfonts/UprightPianoKW-SF2-20220221/UprightPianoKW-20220221.sf2"
     MAJOR_OUTPUT_DIR = "../data/major"
     MINOR_OUTPUT_DIR = "../data/minor"
 
     generator = ChordGenerator(SOUNDFONT_PATH)
     
-    # Generate Major chords
-    for chord_name, inversions in MAJOR_CHORDS.items():
-        for i, inversion in enumerate(inversions):
-            filename = f"{chord_name}_inversion_{i + 1}.wav"
-            output_path = os.path.join(MAJOR_OUTPUT_DIR, filename)
-            generator.generate_chord_file(inversion, output_path)
-            print(f"Generated: {output_path}")
-
-    # Generate Minor chords
-    for chord_name, inversions in MINOR_CHORDS.items():
-        for i, inversion in enumerate(inversions):
-            filename = f"{chord_name}_inversion_{i + 1}.wav"
-            output_path = os.path.join(MINOR_OUTPUT_DIR, filename)
-            generator.generate_chord_file(inversion, output_path)
-            print(f"Generated: {output_path}")
+    for chord_name, notes in MAJOR_CHORDS.items():
+        generator.generate_chord_files(notes, MAJOR_OUTPUT_DIR, chord_name)
+    
+    for chord_name, notes in MINOR_CHORDS.items():
+        generator.generate_chord_files(notes, MINOR_OUTPUT_DIR, chord_name)
