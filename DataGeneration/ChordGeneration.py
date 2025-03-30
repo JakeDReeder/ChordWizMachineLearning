@@ -10,7 +10,7 @@ class ChordGenerator:
         """Initialize the chord generator with a soundfont and sample rate."""
         self.sample_rate = sample_rate
         self.fs = fluidsynth.Synth()
-        self.fs.start()  # Keeping it as your working version
+        self.fs.start()
 
         # Load soundfont
         sound_font = self.fs.sfload(soundfont_path)
@@ -18,7 +18,7 @@ class ChordGenerator:
 
     def generate_chord(self, notes, duration=4.0, velocity=100):
         """Generate audio data for a chord."""
-        midi_notes = [int(librosa.note_to_midi(note)) for note in notes]  # Ensure integer MIDI notes
+        midi_notes = [librosa.note_to_midi(note) for note in notes]
         
         samples = int(self.sample_rate * duration)
 
@@ -76,7 +76,7 @@ class ChordGenerator:
             if np.random.rand() < 0.7:
                 modified_audio = self.add_noise(modified_audio)
 
-            filename = f"{chord_name}.{i}.wav"
+            filename = f"{chord_name}_{i}.wav"
             self.save_wav(modified_audio, os.path.join(output_dir, filename))
             print(f"Generated: {os.path.join(output_dir, filename)}")
 
