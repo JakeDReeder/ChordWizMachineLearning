@@ -9,76 +9,82 @@ class ChordGenerator:
     def __init__(self, soundfont_path, sample_rate=44100):
         """Initialize the chord generator with a soundfont and sample rate."""
         self.sample_rate = sample_rate
-        self.fs = fluidsynth.Synth() # object that is used for generating wav files
-        self.fs.start(driver="dsound")
-        
-        # Load soundfont (piano sound, guitar sound, etc.)
+        self.fs = fluidsynth.Synth()
+        self.fs.start()  # Keeping it as your working version
+
+        # Load soundfont
         sound_font = self.fs.sfload(soundfont_path)
         self.fs.program_select(0, sound_font, 0, 0)
 
     def generate_chord(self, notes, duration=4.0, velocity=100):
         """Generate audio data for a chord."""
-        # Convert music notes to MIDI numbers using librosa
-        midi_notes = [librosa.note_to_midi(note) for note in notes]
+        midi_notes = [int(librosa.note_to_midi(note)) for note in notes]  # Ensure integer MIDI notes
         
-        # Calculate number of samples
         samples = int(self.sample_rate * duration)
-        
-        # Play notes
+
         for note in midi_notes:
             self.fs.noteon(0, note, velocity)
-            
-        # Generate audio data
+
         audio_data = self.fs.get_samples(samples)
-        
-        # Stop notes
+
         for note in midi_notes:
             self.fs.noteoff(0, note)
-        
-        # convert from stereo to mono
+
+        # Convert from stereo to mono
         audio_data = np.mean(np.reshape(audio_data, (-1, 2)), axis=1)
-            
-        # Wait a bit to let the sound decay
-        time.sleep(0.1)
+
+        time.sleep(0.1)  # Let sound decay
         
         return np.array(audio_data)
 
     def apply_micro_tuning(self, audio_data):
-        factor = np.random.uniform(0.99, 1.01)
-        return librosa.effects.time_stretch(audio_data, factor)
-    
+        """Apply small pitch shifts (time-stretching) to simulate tuning variations."""
+        factor = np.random.uniform(0.99, 1.01)        
+        audio_data = audio_data.astype(np.float32)        
+        return librosa.effects.time_stretch(audio_data, rate=factor)
+
+
     def apply_envelope(self, audio_data):
-        env = np.linspace(0.5, 1, len(audio_data))
+        """Apply volume variations over time."""
+        env = np.linspace(np.random.uniform(0.4, 0.8), 1, len(audio_data))
         return audio_data * env
 
     def add_noise(self, audio_data):
-        noise = np.random.normal(0, 0.005, audio_data.shape)
+        """Add slight background noise."""
+        noise = np.random.normal(0, np.random.uniform(0.002, 0.008), audio_data.shape)
         return audio_data + noise
-    
+
     def save_wav(self, audio_data, filename):
+        """Save audio data to a WAV file."""
         audio_data = np.array(audio_data).astype(np.float32)
         audio_data = audio_data / np.max(np.abs(audio_data))
         audio_data = (audio_data * 32767).astype(np.int16)
         wavfile.write(filename, self.sample_rate, audio_data)
-    
+
     def generate_chord_files(self, notes, output_dir, chord_name):
+        """Generate multiple variations of a chord and save them as WAV files."""
         os.makedirs(output_dir, exist_ok=True)
         base_audio = self.generate_chord(notes)
-        
-        variants = {
-            "micro_tuning": self.apply_micro_tuning(base_audio),
-            "envelope_mod": self.apply_envelope(base_audio),
-            "noise_addition": self.add_noise(base_audio),
-            "combined": self.apply_envelope(self.add_noise(self.apply_micro_tuning(base_audio)))
-        }
-        
-        for variant_name, audio in variants.items():
-            filename = f"{chord_name}_{variant_name}.wav"
-            self.save_wav(audio, os.path.join(output_dir, filename))
-    
+
+        for i in range(10):  # Generate 10 variations
+            modified_audio = base_audio.copy()
+
+            if np.random.rand() < 0.7:
+                modified_audio = self.apply_micro_tuning(modified_audio)
+            if np.random.rand() < 0.7:
+                modified_audio = self.apply_envelope(modified_audio)
+            if np.random.rand() < 0.7:
+                modified_audio = self.add_noise(modified_audio)
+
+            filename = f"{chord_name}.{i}.wav"
+            self.save_wav(modified_audio, os.path.join(output_dir, filename))
+            print(f"Generated: {os.path.join(output_dir, filename)}")
+
     def __del__(self):
         self.fs.delete()
 
+
+# Import chord dictionaries
 from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS
 
 if __name__ == "__main__":
@@ -87,9 +93,13 @@ if __name__ == "__main__":
     MINOR_OUTPUT_DIR = "../data/minor"
 
     generator = ChordGenerator(SOUNDFONT_PATH)
-    
-    for chord_name, notes in MAJOR_CHORDS.items():
-        generator.generate_chord_files(notes, MAJOR_OUTPUT_DIR, chord_name)
-    
-    for chord_name, notes in MINOR_CHORDS.items():
-        generator.generate_chord_files(notes, MINOR_OUTPUT_DIR, chord_name)
+
+    # Generate Major chords
+    for chord_name, inversions in MAJOR_CHORDS.items():
+        for i, inversion in enumerate(inversions):
+            generator.generate_chord_files(inversion, MAJOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # Generate Minor chords
+    for chord_name, inversions in MINOR_CHORDS.items():
+        for i, inversion in enumerate(inversions):
+            generator.generate_chord_files(inversion, MINOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
