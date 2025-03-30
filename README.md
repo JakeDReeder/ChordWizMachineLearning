@@ -4,5 +4,6 @@ A Neural Network Model trained on audio data of musical chords to identify chord
 
 # To Generate data:
 
+- For MacOS: brew install fluidsynth | For Windows: choco install fluidsyth
 - cd DataGeneration
 - python ChordGeneration.py
