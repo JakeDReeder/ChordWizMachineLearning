@@ -66,7 +66,7 @@ class ChordGenerator:
         os.makedirs(output_dir, exist_ok=True)
         base_audio = self.generate_chord(notes)
 
-        for i in range(10):  # Generate 10 variations
+        for i in range(5):  # Generate 5 variations
             modified_audio = base_audio.copy()
 
             if np.random.rand() < 0.7:
@@ -85,21 +85,33 @@ class ChordGenerator:
 
 
 # Import chord dictionaries
-from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS
+from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS, DIMINISHED_CHORDS, AUGMENTED_CHORDS
 
 if __name__ == "__main__":
     SOUNDFONT_PATH = "Soundfonts/UprightPianoKW-SF2-20220221/UprightPianoKW-20220221.sf2"
     MAJOR_OUTPUT_DIR = "../data/major"
     MINOR_OUTPUT_DIR = "../data/minor"
+    DIMINISHED_OUTPUT_DIR = "../data/diminished"
+    AUGMENTED_OUTPUT_DIR = "../data/augmented"
 
     generator = ChordGenerator(SOUNDFONT_PATH)
 
-    # Generate Major chords
-    for chord_name, inversions in MAJOR_CHORDS.items():
-        for i, inversion in enumerate(inversions):
-            generator.generate_chord_files(inversion, MAJOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+    # # Generate Major chords
+    # for chord_name, inversions in MAJOR_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, MAJOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
 
-    # Generate Minor chords
-    for chord_name, inversions in MINOR_CHORDS.items():
+    # # Generate Minor chords
+    # for chord_name, inversions in MINOR_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, MINOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # # Generate Diminished chords
+    # for chord_name, inversions in DIMINISHED_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, DIMINISHED_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # Generate Augmented chords
+    for chord_name, inversions in AUGMENTED_CHORDS.items():
         for i, inversion in enumerate(inversions):
-            generator.generate_chord_files(inversion, MINOR_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+            generator.generate_chord_files(inversion, AUGMENTED_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
