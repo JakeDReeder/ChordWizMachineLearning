@@ -85,7 +85,7 @@ class ChordGenerator:
 
 
 # Import chord dictionaries
-from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS, DIMINISHED_CHORDS, AUGMENTED_CHORDS
+from ChordDictionary import MAJOR_CHORDS, MINOR_CHORDS, DIMINISHED_CHORDS, AUGMENTED_CHORDS, SUS2_CHORDS, SUS4_CHORDS, FLAT5_CHORDS
 
 if __name__ == "__main__":
     SOUNDFONT_PATH = "Soundfonts/UprightPianoKW-SF2-20220221/UprightPianoKW-20220221.sf2"
@@ -93,6 +93,9 @@ if __name__ == "__main__":
     MINOR_OUTPUT_DIR = "../data/minor"
     DIMINISHED_OUTPUT_DIR = "../data/diminished"
     AUGMENTED_OUTPUT_DIR = "../data/augmented"
+    SUS2_OUTPUT_DIR = "../data/suspended2nd"
+    SUS4_OUTPUT_DIR = "../data/suspended4th"
+    FLAT5_OUTPUT_DIR = "../data/flat5"
 
     generator = ChordGenerator(SOUNDFONT_PATH)
 
@@ -111,7 +114,22 @@ if __name__ == "__main__":
     #     for i, inversion in enumerate(inversions):
     #         generator.generate_chord_files(inversion, DIMINISHED_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
 
-    # Generate Augmented chords
-    for chord_name, inversions in AUGMENTED_CHORDS.items():
+    # # Generate Augmented chords
+    # for chord_name, inversions in AUGMENTED_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, AUGMENTED_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # # Generate Suspended2nd chords
+    # for chord_name, inversions in SUS2_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, SUS2_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # # Generate Suspended4th chords
+    # for chord_name, inversions in SUS4_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, SUS4_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # Generate Flat5 chords
+    for chord_name, inversions in FLAT5_CHORDS.items():
         for i, inversion in enumerate(inversions):
-            generator.generate_chord_files(inversion, AUGMENTED_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+            generator.generate_chord_files(inversion, FLAT5_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
