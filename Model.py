@@ -37,7 +37,7 @@ def create_cnn_model_2(X_train):
     model.add(Flatten())
     model.add(Dense(128, activation='relu'))
 
-    model.add(Dense(4, activation='softmax'))
+    model.add(Dense(24, activation='softmax'))
 
     return model
 

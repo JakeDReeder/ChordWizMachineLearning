@@ -66,7 +66,7 @@ class ChordGenerator:
         os.makedirs(output_dir, exist_ok=True)
         base_audio = self.generate_chord(notes)
 
-        for i in range(5):  # Generate 5 variations
+        for i in range(15):  # Generate 15 variations
             modified_audio = base_audio.copy()
 
             if np.random.rand() < 0.7:
@@ -96,6 +96,7 @@ if __name__ == "__main__":
     SUS2_OUTPUT_DIR = "../data/suspended2nd"
     SUS4_OUTPUT_DIR = "../data/suspended4th"
     FLAT5_OUTPUT_DIR = "../data/flat5"
+    OUTPUT_DIR = "../data/multi"
 
     generator = ChordGenerator(SOUNDFONT_PATH)
 
@@ -129,7 +130,19 @@ if __name__ == "__main__":
     #     for i, inversion in enumerate(inversions):
     #         generator.generate_chord_files(inversion, SUS4_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
 
-    # Generate Flat5 chords
-    for chord_name, inversions in FLAT5_CHORDS.items():
+    # # Generate Flat5 chords
+    # for chord_name, inversions in FLAT5_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, FLAT5_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # # Generate Major chords for multiclass
+    # for chord_name, inversions in MAJOR_CHORDS.items():
+    #     for i, inversion in enumerate(inversions):
+    #         generator.generate_chord_files(inversion, OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+    # Generate Minor chords for multiclass
+    for chord_name, inversions in MINOR_CHORDS.items():
         for i, inversion in enumerate(inversions):
-            generator.generate_chord_files(inversion, FLAT5_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+            generator.generate_chord_files(inversion, OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+
+
