@@ -66,7 +66,7 @@ class ChordGenerator:
         os.makedirs(output_dir, exist_ok=True)
         base_audio = self.generate_chord(notes)
 
-        for i in range(15):  # Generate 15 variations
+        for i in range(5):  # Generate 5 variations
             modified_audio = base_audio.copy()
 
             if np.random.rand() < 0.7:
@@ -135,10 +135,10 @@ if __name__ == "__main__":
     #     for i, inversion in enumerate(inversions):
     #         generator.generate_chord_files(inversion, FLAT5_OUTPUT_DIR, f"{chord_name}_v{i + 1}")
 
-    # # Generate Major chords for multiclass
-    # for chord_name, inversions in MAJOR_CHORDS.items():
-    #     for i, inversion in enumerate(inversions):
-    #         generator.generate_chord_files(inversion, OUTPUT_DIR, f"{chord_name}_v{i + 1}")
+    # Generate Major chords for multiclass
+    for chord_name, inversions in MAJOR_CHORDS.items():
+        for i, inversion in enumerate(inversions):
+            generator.generate_chord_files(inversion, OUTPUT_DIR, f"{chord_name}_v{i + 1}")
 
     # Generate Minor chords for multiclass
     for chord_name, inversions in MINOR_CHORDS.items():
